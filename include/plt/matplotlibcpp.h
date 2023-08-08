@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <string> // std::stod
 #include <vector>
+#include <span>
 
 #ifndef WITHOUT_NUMPY
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -424,7 +425,7 @@ namespace matplotlibcpp
         //    template <> struct select_npy_type<unsigned long long> { const static NPY_TYPES type = NPY_UINT64; };
 
         template <typename Numeric>
-        PyObject* get_array (const std::vector<Numeric>& v)
+        PyObject* get_array (std::span<const Numeric> v)
         {
             npy_intp vsize = v.size();
             NPY_TYPES type = select_npy_type<Numeric>::type;
@@ -512,7 +513,7 @@ namespace matplotlibcpp
 ///
 /// See: https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.plot.html
     template <typename Numeric>
-    bool plot (const std::vector<Numeric>& x, const std::vector<Numeric>& y, const std::map<std::string, std::string>& keywords)
+    bool plot (std::span<const Numeric> x, std::span<const Numeric> y, const std::map<std::string, std::string>& keywords)
     {
         assert (x.size() == y.size());
 
@@ -1515,7 +1516,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool plot (const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& s = "")
+    bool plot (std::span<const NumericX> x, std::span<const NumericY> y, const std::string& s = "")
     {
         assert (x.size() == y.size());
 
@@ -1712,7 +1713,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool stem (const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& s = "")
+    bool stem (std::span<const NumericX> x, std::span<const NumericY> y, const std::string& s = "")
     {
         assert (x.size() == y.size());
 
@@ -1739,7 +1740,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool semilogx (const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& s = "")
+    bool semilogx (std::span<const NumericX> x, std::span<const NumericY> y, const std::string& s = "")
     {
         assert (x.size() == y.size());
 
@@ -1765,7 +1766,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool semilogy (const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& s = "")
+    bool semilogy (std::span<const NumericX> x, std::span<const NumericY> y, const std::string& s = "")
     {
         assert (x.size() == y.size());
 
@@ -1791,7 +1792,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool loglog (const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& s = "")
+    bool loglog (std::span<const NumericX> x, std::span<const NumericY> y, const std::string& s = "")
     {
         assert (x.size() == y.size());
 
@@ -1881,7 +1882,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool named_plot (const std::string& name, const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& format = "")
+    bool named_plot (const std::string& name, std::span<const NumericX> x, std::span<const NumericY> y, const std::string& format = "")
     {
         detail::_interpreter::get();
 
@@ -1909,7 +1910,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool named_semilogx (const std::string& name, const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& format = "")
+    bool named_semilogx (const std::string& name, std::span<const NumericX> x, std::span<const NumericY> y, const std::string& format = "")
     {
         detail::_interpreter::get();
 
@@ -1937,7 +1938,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool named_semilogy (const std::string& name, const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& format = "")
+    bool named_semilogy (const std::string& name, std::span<const NumericX> x, std::span<const NumericY> y, const std::string& format = "")
     {
         detail::_interpreter::get();
 
@@ -1965,7 +1966,7 @@ namespace matplotlibcpp
     }
 
     template <typename NumericX, typename NumericY>
-    bool named_loglog (const std::string& name, const std::vector<NumericX>& x, const std::vector<NumericY>& y, const std::string& format = "")
+    bool named_loglog (const std::string& name, std::span<const NumericX> x, std::span<const NumericY> y, const std::string& format = "")
     {
         detail::_interpreter::get();
 
@@ -1997,7 +1998,7 @@ namespace matplotlibcpp
         std::vector<Numeric> x (y.size());
         for (size_t i = 0; i < x.size(); ++i)
             x.at (i) = i;
-        return plot (x, y, format);
+        return plot<Numeric, Numeric> (x, y, format);
     }
 
     template <typename Numeric>
@@ -3173,7 +3174,7 @@ namespace matplotlibcpp
     public:
         // default initialization with plot label, some data and format
         template <typename Numeric>
-        Plot (const std::string& name, const std::vector<Numeric>& x, const std::vector<Numeric>& y, const std::string& format = "")
+        Plot (const std::string& name, std::span<const Numeric> x, std::span<const Numeric> y, const std::string& format = "")
         {
             detail::_interpreter::get();
 
@@ -3213,10 +3214,10 @@ namespace matplotlibcpp
         // shorter initialization with name or format only
         // basically calls line, = plot([], [])
         Plot (const std::string& name = "", const std::string& format = "")
-                : Plot (name, std::vector<double>(), std::vector<double>(), format) {}
+                : Plot (name, std::span<const double>{}, std::span<const double>{}, format) {}
 
         template <typename Numeric>
-        bool update (const std::vector<Numeric>& x, const std::vector<Numeric>& y)
+        bool update (std::span<const Numeric> x, std::span<const Numeric> y)
         {
             assert (x.size() == y.size());
             if (set_data_fct)
@@ -3239,7 +3240,7 @@ namespace matplotlibcpp
         // clears the plot but keep it available
         bool clear()
         {
-            return update (std::vector<double>(), std::vector<double>());
+            return update (std::span<const double>(), std::span<const double>());
         }
 
         // definitely remove this line
