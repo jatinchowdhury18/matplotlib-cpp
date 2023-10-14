@@ -1855,7 +1855,7 @@ namespace matplotlibcpp
     }
 
     template <typename Numeric>
-    bool named_plot (const std::string& name, const std::vector<Numeric>& y, const std::string& format = "")
+    bool named_plot (const std::string& name, const std::span<const Numeric>& y, const std::string& format = "")
     {
         detail::_interpreter::get();
 
